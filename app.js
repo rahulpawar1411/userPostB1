@@ -19,6 +19,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Cookie options for cross-origin (frontend on different domain)
+const isProduction = process.env.NODE_ENV === "production";
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+};
+
 app.get("/", (req, res) => {
   res.send("Backend is running successfully 🚀");
 });
@@ -48,7 +56,7 @@ app.get("/", (req, res) => {
         { expiresIn: "1h" } // ✅ expiry lagana best practice hai
       );
 
-      res.cookie("token", token, { httpOnly: true }); // ✅ httpOnly cookie
+      res.cookie("token", token, cookieOptions);
       return res
         .status(201)
         .json({ message: "User registered", user: newUser });
@@ -75,7 +83,7 @@ app.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.cookie("token", token, { httpOnly: true }); // ✅ secure cookie
+    res.cookie("token", token, cookieOptions);
     res.status(200).send("Login successful");
   } catch (error) {
     res.status(500).send("Server error");
@@ -84,9 +92,7 @@ app.post("/login", async (req, res) => {
 
 // ================= Logout =================
 app.get("/logout", (req, res) => {
-  // ❌ pehle tumne comment kiya tha aur cookie ko khali string kar rahe the
-  // ✅ sahi tarika: clearCookie
-  res.clearCookie("token");
+  res.clearCookie("token", cookieOptions);
   res.send("User logged out");
 });
 
