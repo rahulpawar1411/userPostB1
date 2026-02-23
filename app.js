@@ -19,6 +19,10 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
+
 // ================= Register =================
  app.post("/register", async (req, res) => {
   try {
